@@ -28,6 +28,9 @@ async function run() {
     // await client.connect();
 
     const serviceCollections = client.db('servicesDB').collection('services');
+    const reviewCollection = client.db('servicesDB').collection('reviews');
+
+    // services API
     app.get('/featuredServices', async (req,res)=>{
         const result = await serviceCollections.find().limit(6).toArray();
         res.send(result)
@@ -45,6 +48,13 @@ async function run() {
       const id = req.params.id;
       const query = {_id: new ObjectId(id)};
       const result = await serviceCollections.findOne(query);
+      res.send(result)
+    })
+
+    // reviews API
+    app.post('/reviews', async (req,res)=>{
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
       res.send(result)
     })
     // Send a ping to confirm a successful connection
