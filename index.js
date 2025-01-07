@@ -41,13 +41,28 @@ async function run() {
       res.send(result);
     });
     app.get('/services', async (req,res)=>{
-      const result = await serviceCollections.find().toArray();
+      const email = req.query.email;
+      let query = {};
+      if(email){
+        query = {userEmail: email}
+      }
+      const result = await serviceCollections.find(query).toArray();
       res.send(result)
     })
     app.get('/services/:id', async (req,res)=>{
       const id = req.params.id;
       const query = {_id: new ObjectId(id)};
       const result = await serviceCollections.findOne(query);
+      res.send(result)
+    });
+    app.put('/services/:id', async (req,res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)};
+      const options = { upsert: false };
+      const updateDoc = {
+        $set: req.body
+      }
+      const result = await serviceCollections.updateOne(filter,updateDoc,options)
       res.send(result)
     })
 
@@ -56,6 +71,16 @@ async function run() {
       const review = req.body;
       const result = await reviewCollection.insertOne(review);
       res.send(result)
+    })
+    app.get('/reviews', async (req,res)=>{
+      const result = await reviewCollection.find().toArray();
+      res.send(result)
+    })
+    app.get('/reviews/service/:service_id', async (req,res)=>{
+      const serviceId = req.params.service_id;
+      const query = {service_id: serviceId};
+      const result = await reviewCollection.find(query).toArray();
+      res.send(result);
     })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
