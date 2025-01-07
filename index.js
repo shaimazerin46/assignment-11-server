@@ -64,6 +64,12 @@ async function run() {
       }
       const result = await serviceCollections.updateOne(filter,updateDoc,options)
       res.send(result)
+    });
+    app.delete('/services/:id',async (req,res)=>{
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)};
+        const result = await serviceCollections.deleteOne(query);
+        res.send(result)
     })
 
     // reviews API
