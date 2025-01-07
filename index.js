@@ -79,7 +79,33 @@ async function run() {
       res.send(result)
     })
     app.get('/reviews', async (req,res)=>{
-      const result = await reviewCollection.find().toArray();
+      const email = req.query.email;
+      let query = {};
+      if(email){
+        query = {"userInfo.email": email}
+      }
+      const result = await reviewCollection.find(query).toArray();
+      res.send(result)
+    });
+    app.put('/reviews/:id', async (req,res)=>{
+      const id = req.params.id;
+      const {text,rating} = req.body;
+      const filter = {_id: new ObjectId(id)};
+      const options = { upsert: false };
+      const updateDoc = {
+        $set: {
+          text: text, 
+          rating: rating, 
+        },
+      }
+     
+      const result = await reviewCollection.updateOne(filter,updateDoc,options);
+      res.send(result)
+    });
+    app.delete('/reviews/:id', async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await reviewCollection.deleteOne(query);
       res.send(result)
     })
     app.get('/reviews/service/:service_id', async (req,res)=>{
@@ -87,7 +113,8 @@ async function run() {
       const query = {service_id: serviceId};
       const result = await reviewCollection.find(query).toArray();
       res.send(result);
-    })
+    });
+    
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
